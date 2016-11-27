@@ -1,30 +1,55 @@
 apply plugin: 'com.android.application'
 
+def getVersionName = { ->
+    try {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'describe', '--tags', '--dirty'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim()
+    }
+    catch (ignored) {
+        return null;
+    }
+}
+
 android {
+    signingConfigs {
+        release {
+            keyAlias 'android'
+            keyPassword System.getenv("KEYPWD")
+            storeFile file('/home/mike/.keystore-android.jks')
+            storePassword System.getenv("KSTOREPWD")
+        }
+    }
     compileSdkVersion 24
     buildToolsVersion "22.0.1"
     defaultConfig {
         applicationId "com.pbrane.mike.countdown"
         minSdkVersion 23
         targetSdkVersion 24
-        versionCode 1
-        versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        versionName getVersionName()
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+            applicationVariants.all { variant ->
+                variant.outputs.each { output ->
+                    def vstr = variant.versionName.toString().split("-")
+                    def appName = "countdown-" + vstr[0] + "-" + vstr[1]
+                    output.outputFile = new File(output.outputFile.parent,
+                            output.outputFile.name.replace("app-release", appName))
+                }
+            }
         }
     }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
     compile 'com.android.support:appcompat-v7:24.2.1'
-    testCompile 'junit:junit:4.12'
     compile 'joda-time:joda-time:2.9.6'
 }

@@ -96,7 +96,6 @@ public class MainActivity extends AppCompatActivity {
 
 		String dateTime = String.format(Locale.getDefault(), "%04d%02d%02d", dp.getYear(), dp.getMonth() + 1, dp.getDayOfMonth());
 		dateTime += "170000";
-		System.out.println("*** DatePicker.toString()" + dateTime);
 		savedInstanceState.putString("DateTime", dateTime);
 	}
 
@@ -135,8 +134,6 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private void printDifference(Date startDate, Date endDate) {
-		System.out.println("Start Date: " + startDate.toString());
-		System.out.println("End Date: " + endDate.toString());
 		Interval interval = new Interval(startDate.getTime(), endDate.getTime());
 		Period period = interval.toPeriod();
 
@@ -144,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
 		int months = period.getMonths();
 		int days = period.getDays();
 		int hours = period.getHours();
-		int  minutes = period.getMinutes();
+		int minutes = period.getMinutes();
 		int seconds = period.getSeconds();
 
 		textView.setText("");
@@ -163,26 +160,7 @@ public class MainActivity extends AppCompatActivity {
 		if (minutes > 0) {
 			textView.append(String.format(Locale.getDefault(), "%-4d %s\n", minutes, minutes > 1 ? "Minutes" : "Minute"));
 		}
-
 		textView.append(String.format(Locale.getDefault(), "%-4d %s\n", seconds, seconds > 1 ? "Seconds" : "Second"));
-
-//		textView.append(Html.fromHtml("<font color=#cc0000><b>" +
-//				String.format(Locale.getDefault(), "%d %s", years, years > 1 ? "Years" : "Year") + "</b></font><br>"));
-//
-//		textView.append(Html.fromHtml("<font color=#00cc00><b>" +
-//				String.format(Locale.getDefault(), "%d %s", months, months > 1 ? "Months" : "Month") + "</b></font><br>"));
-//
-//		textView.append(Html.fromHtml("<font color=#0000cc><b>" +
-//				String.format(Locale.getDefault(), "%d %s", days, days > 1 ? "Days" : "Day") + "</b></font><br>"));
-//
-//		textView.append(Html.fromHtml("<font color=#cccc00><b>" +
-//				String.format(Locale.getDefault(), "%d %s", hours, hours > 1 ? "Hours" : "Hour") + "</b></font><br>"));
-//
-//		textView.append(Html.fromHtml("<font color=#00cccc><b>" +
-//				String.format(Locale.getDefault(), "%d %s", minutes, minutes > 1 ? "Minutes" : "Minute") + "</b></font><br>"));
-//
-//		textView.append(Html.fromHtml("<font color=#cc00cc><b>" +
-//				String.format(Locale.getDefault(), "%d %s", seconds, seconds > 1 ? "Seconds" : "Second") + "</b></font><br>"));
 	}
 
 }
