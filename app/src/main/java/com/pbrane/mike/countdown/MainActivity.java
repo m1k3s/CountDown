@@ -25,7 +25,7 @@ import org.joda.time.Period;
 public class MainActivity extends AppCompatActivity {
 
 	public TextView textView;
-	private String retirementDateTime = "01/01/2023 17:00:00"; // dd/MM/yyyy hh:mm:ss
+	private String retirementDateTime = "01/01/2023 17:00:00"; // dd/MM/yyyy HH:mm:ss
 	private DatePicker dp;
 	private TimePicker tp;
 	// initial values for date/time
@@ -50,17 +50,16 @@ public class MainActivity extends AppCompatActivity {
 		DatePicker.OnDateChangedListener dateChangedListener = new DatePicker.OnDateChangedListener() {
 			@Override
 			public void onDateChanged(DatePicker datePicker, int yearIn, int monthIn, int dayIn) {
-				System.out.println(String.format(Locale.getDefault(), "OnDateChanged initial: %02d/%02d/%04d", dayIn, monthIn, yearIn));
 				year = yearIn;
 				month = monthIn + 1;
 				day = dayIn;
 				retirementDateTime = String.format(Locale.getDefault(), "%02d/%02d/%4d %02d:%02d:%02d", day, month, year, hour, minute, second);
 				saveDateTime(String.format(Locale.getDefault(), "%02d%02d%04d%02d%02d%02d", day, month, year, hour, minute, second));
-				System.out.println(String.format(Locale.getDefault(), "OnDateChanged final: %02d/%02d/%04d", day, month, year));
 			}
 		};
 
 		dp = (DatePicker)findViewById(R.id.datePicker);
+		dp.setDescendantFocusability(DatePicker.FOCUS_BLOCK_DESCENDANTS); // no keyboard
 		dp.init(year, month - 1, day, dateChangedListener); // month is zero-offset
 
 		TimePicker.OnTimeChangedListener timeChangedListener = new TimePicker.OnTimeChangedListener() {
@@ -74,19 +73,20 @@ public class MainActivity extends AppCompatActivity {
 		};
 
 		tp = (TimePicker)findViewById(R.id.timePicker);
+		tp.setDescendantFocusability(DatePicker.FOCUS_BLOCK_DESCENDANTS); // no keyboard
 		tp.setIs24HourView(true);
 		tp.setHour(hour);
 		tp.setMinute(minute);
 		tp.setOnTimeChangedListener(timeChangedListener);
 
-		final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss", Locale.getDefault());
+		final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
 
 		final Handler handler = new Handler();
 		handler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					String currentDateTime = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss", Locale.getDefault()).format(Calendar.getInstance().getTime());
+					String currentDateTime = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().getTime());
 					final Date start = simpleDateFormat.parse(currentDateTime);
 					final Date end = simpleDateFormat.parse(retirementDateTime);
 					if (end.compareTo(start) < 0) {
@@ -191,8 +191,6 @@ public class MainActivity extends AppCompatActivity {
 		Interval interval = new Interval(startDate.getTime(), endDate.getTime());
 		Period period = interval.toPeriod();
 
-		System.out.println("Period difference: " + period);
-
 		int years = period.getYears();
 		int months = period.getMonths();
 		int weeks = period.getWeeks();
@@ -203,24 +201,29 @@ public class MainActivity extends AppCompatActivity {
 
 		textView.setText("");
 		if (years > 0) {
-			textView.append(String.format(Locale.getDefault(), "%-4d %s\n", years, years > 1 ? "Years" : "Year"));
+			textView.append(String.format(Locale.getDefault(), "%3d %10s\n", years, years > 1 ? "Years" : "Year"));
 		}
 		if (months > 0) {
-			textView.append(String.format(Locale.getDefault(), "%-4d %s\n", months, months > 1 ? "Months" : "Month"));
+			textView.append(String.format(Locale.getDefault(), "%3d %10s\n", months, months > 1 ? "Months" : "Month"));
 		}
 		if (weeks > 0) {
-			textView.append(String.format(Locale.getDefault(), "%-4d %s\n", weeks, weeks > 1 ? "Weeks" : "Week"));
+			textView.append(String.format(Locale.getDefault(), "%3d %10s\n", weeks, weeks > 1 ? "Weeks" : "Week"));
 		}
 		if (days > 0) {
-			textView.append(String.format(Locale.getDefault(), "%-4d %s\n", days, days > 1 ? "Days" : "Day"));
+			textView.append(String.format(Locale.getDefault(), "%3d %10s\n", days, days > 1 ? "Days" : "Day"));
 		}
 		if (hours > 0) {
-			textView.append(String.format(Locale.getDefault(), "%-4d %s\n", hours, hours > 1 ? "Hours" : "Hour"));
+			textView.append(String.format(Locale.getDefault(), "%3d %10s\n", hours, hours > 1 ? "Hours" : "Hour"));
 		}
 		if (minutes > 0) {
-			textView.append(String.format(Locale.getDefault(), "%-4d %s\n", minutes, minutes > 1 ? "Minutes" : "Minute"));
+			textView.append(String.format(Locale.getDefault(), "%3d %10s\n", minutes, minutes > 1 ? "Minutes" : "Minute"));
 		}
-		textView.append(String.format(Locale.getDefault(), "%-4d %s\n", seconds, seconds > 1 ? "Seconds" : "Second"));
+		if (seconds > 0) {
+			textView.append(String.format(Locale.getDefault(), "%3d %10s\n", seconds, seconds > 1 ? "Seconds" : "Second"));
+		}
+		if ((years + months + weeks + days + hours + minutes + seconds) <= 0) {
+			textView.append("You have reached your goal!");
+		}
 	}
 
 }
