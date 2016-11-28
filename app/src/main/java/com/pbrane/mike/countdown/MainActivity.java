@@ -8,6 +8,8 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.TypedValue;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -40,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
 	private int minute;
 	private int second = 0;
 	private int whichView = 0;
+
+	private GestureDetector gestureDetector;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -76,10 +80,10 @@ public class MainActivity extends AppCompatActivity {
 				retirementDateTime = String.format(Locale.getDefault(), "%02d/%02d/%4d %02d:%02d:%02d", day, month, year, hour, minute, second);
 				saveDateTime(String.format(Locale.getDefault(), "%04d%02d%02d%02d%02d%02d", year, month, day, hour, minute, second));
 
-				new AnimationUtils();
-				switcher.setAnimation(AnimationUtils.makeInAnimation(getBaseContext(), true));
-				switcher.showNext();
-				whichView = 1;
+//				new AnimationUtils();
+//				switcher.setAnimation(AnimationUtils.makeInAnimation(getBaseContext(), true));
+//				switcher.showNext();
+//				whichView = 1;
 			}
 		});
 
@@ -92,10 +96,10 @@ public class MainActivity extends AppCompatActivity {
 				retirementDateTime = String.format(Locale.getDefault(), "%02d/%02d/%4d %02d:%02d:%02d", day, month, year, hour, minute, second);
 				saveDateTime(String.format(Locale.getDefault(), "%04d%02d%02d%02d%02d%02d", year, month, day, hour, minute, second));
 
-				new AnimationUtils();
-				switcher.setAnimation(AnimationUtils.makeInAnimation(getBaseContext(), true));
-				switcher.showPrevious();
-				whichView = 0;
+//				new AnimationUtils();
+//				switcher.setAnimation(AnimationUtils.makeOutAnimation(getBaseContext(), true));
+//				switcher.showPrevious();
+//				whichView = 0;
 			}
 		});
 
@@ -133,6 +137,9 @@ public class MainActivity extends AppCompatActivity {
 				retirementDateTime = setRetirementDateTime(dateTime);
 			}
 		}
+
+		CustomGestureDetector customGestureDetector = new CustomGestureDetector();
+		gestureDetector = new GestureDetector(this, customGestureDetector);
 
 	}
 
@@ -218,6 +225,35 @@ public class MainActivity extends AppCompatActivity {
 			textView.append(String.format(Locale.getDefault(), "%-4d %s\n", minutes, minutes > 1 ? "Minutes" : "Minute"));
 		}
 		textView.append(String.format(Locale.getDefault(), "%-4d %s\n", seconds, seconds > 1 ? "Seconds" : "Second"));
+	}
+
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		gestureDetector.onTouchEvent(event);
+		return super.onTouchEvent(event);
+	}
+
+	private class CustomGestureDetector extends GestureDetector.SimpleOnGestureListener {
+		@Override
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+
+			// swipe left (next)
+			if (e1.getX() > e2.getX()) {
+				new AnimationUtils();
+				switcher.setAnimation(AnimationUtils.makeInAnimation(getBaseContext(), false));
+				switcher.showNext();
+				whichView = 1;
+			}
+
+			// swipe right (previous)
+			if (e1.getX() < e2.getX()) {
+				new AnimationUtils();
+				switcher.setAnimation(AnimationUtils.makeOutAnimation(getBaseContext(), true));
+				switcher.showPrevious();
+				whichView = 0;
+			}
+			return super.onFling(e1, e2, velocityX, velocityY);
+		}
 	}
 
 }
