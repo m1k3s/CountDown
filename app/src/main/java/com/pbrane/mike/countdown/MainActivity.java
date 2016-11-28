@@ -7,16 +7,11 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.TypedValue;
-//import android.view.GestureDetector;
-//import android.view.MotionEvent;
-import android.view.View;
-import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.ViewSwitcher;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -29,91 +24,76 @@ import org.joda.time.Period;
 
 public class MainActivity extends AppCompatActivity {
 
-	public TextView textView1;
-	public TextView textView2;
-	private String retirementDateTime = "01/01/2023 17:00:00"; // dd/M/yyyy hh:mm:ss
+	public TextView textView;
+	private String retirementDateTime = "01/01/2023 17:00:00"; // dd/MM/yyyy hh:mm:ss
 	private DatePicker dp;
 	private TimePicker tp;
-	private ViewSwitcher switcher;
-	private int year;
-	private int month;
-	private int day;
-	private int hour;
-	private int minute;
-	private int second = 0;
-	private int whichView = 0;
-
-//	private GestureDetector gestureDetector;
+	// initial values for date/time
+	private int year = 2023;
+	private int month = 1;
+	private int day = 1;
+	private int hour = 17;
+	private int minute = 0;
+	private final int second = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		switcher = (ViewSwitcher)findViewById(R.id.ViewSwitcher);
+		// setup the textview
+		textView = (TextView) findViewById(R.id.textView);
+		textView.setTypeface(Typeface.MONOSPACE);
+		textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32.0f);
+		textView.setTextColor(Color.GRAY);
 
-		textView1 = (TextView) findViewById(R.id.textView1);
-		textView1.setTypeface(Typeface.MONOSPACE);
-		textView1.setTextSize(TypedValue.COMPLEX_UNIT_SP, 36.0f);
-		textView1.setTextColor(Color.GRAY);
-
-		textView2 = (TextView) findViewById(R.id.textView2);
-		textView2.setTypeface(Typeface.MONOSPACE);
-		textView2.setTextSize(TypedValue.COMPLEX_UNIT_SP, 36.0f);
-		textView2.setTextColor(Color.GRAY);
+		DatePicker.OnDateChangedListener dateChangedListener = new DatePicker.OnDateChangedListener() {
+			@Override
+			public void onDateChanged(DatePicker datePicker, int yearIn, int monthIn, int dayIn) {
+				System.out.println(String.format(Locale.getDefault(), "OnDateChanged initial: %02d/%02d/%04d", dayIn, monthIn, yearIn));
+				year = yearIn;
+				month = monthIn + 1;
+				day = dayIn;
+				retirementDateTime = String.format(Locale.getDefault(), "%02d/%02d/%4d %02d:%02d:%02d", day, month, year, hour, minute, second);
+				saveDateTime(String.format(Locale.getDefault(), "%02d%02d%04d%02d%02d%02d", day, month, year, hour, minute, second));
+				System.out.println(String.format(Locale.getDefault(), "OnDateChanged final: %02d/%02d/%04d", day, month, year));
+			}
+		};
 
 		dp = (DatePicker)findViewById(R.id.datePicker);
-		dp.init(2023, 0, 1, null); // month is zero-offset
+		dp.init(year, month - 1, day, dateChangedListener); // month is zero-offset
+
+		TimePicker.OnTimeChangedListener timeChangedListener = new TimePicker.OnTimeChangedListener() {
+			@Override
+			public void onTimeChanged(TimePicker timePicker, int hourIn, int minuteIn) {
+				hour = hourIn;
+				minute = minuteIn;
+				retirementDateTime = String.format(Locale.getDefault(), "%02d/%02d/%4d %02d:%02d:%02d", day, month, year, hour, minute, second);
+				saveDateTime(String.format(Locale.getDefault(), "%02d%02d%04d%02d%02d%02d", day, month, year, hour, minute, second));
+			}
+		};
 
 		tp = (TimePicker)findViewById(R.id.timePicker);
-		tp.setIs24HourView(false);
-		tp.setHour(17);
-		tp.setMinute(0);
+		tp.setIs24HourView(true);
+		tp.setHour(hour);
+		tp.setMinute(minute);
+		tp.setOnTimeChangedListener(timeChangedListener);
 
-		Button dateButton = (Button)findViewById(R.id.dateButton);
-		dateButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				year = dp.getYear();
-				month = dp.getMonth() + 1; // month is zero-offset
-				day = dp.getDayOfMonth();
-				retirementDateTime = String.format(Locale.getDefault(), "%02d/%02d/%4d %02d:%02d:%02d", day, month, year, hour, minute, second);
-				saveDateTime(String.format(Locale.getDefault(), "%04d%02d%02d%02d%02d%02d", year, month, day, hour, minute, second));
-
-				new AnimationUtils();
-				switcher.setAnimation(AnimationUtils.makeInAnimation(getBaseContext(), false));
-				switcher.showNext();
-				whichView = 1;
-			}
-		});
-
-		Button timeButton = (Button)findViewById(R.id.timeButton);
-		timeButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				hour = tp.getHour();
-				minute = tp.getMinute();
-				retirementDateTime = String.format(Locale.getDefault(), "%02d/%02d/%4d %02d:%02d:%02d", day, month, year, hour, minute, second);
-				saveDateTime(String.format(Locale.getDefault(), "%04d%02d%02d%02d%02d%02d", year, month, day, hour, minute, second));
-
-				new AnimationUtils();
-				switcher.setAnimation(AnimationUtils.makeOutAnimation(getBaseContext(), true));
-				switcher.showPrevious();
-				whichView = 0;
-			}
-		});
-
-		final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/M/yyyy hh:mm:ss", Locale.getDefault());
+		final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss", Locale.getDefault());
 
 		final Handler handler = new Handler();
 		handler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					String currentDateTime = new SimpleDateFormat("dd/M/yyyy hh:mm:ss", Locale.getDefault()).format(Calendar.getInstance().getTime());
+					String currentDateTime = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss", Locale.getDefault()).format(Calendar.getInstance().getTime());
 					final Date start = simpleDateFormat.parse(currentDateTime);
 					final Date end = simpleDateFormat.parse(retirementDateTime);
-					printDifference(start, end);
+					if (end.compareTo(start) < 0) {
+						printError();
+					} else {
+						printDifference(start, end);
+					}
 					handler.postDelayed(this, 1000);
 				} catch (ParseException e) {
 					e.printStackTrace();
@@ -125,7 +105,10 @@ public class MainActivity extends AppCompatActivity {
 			String date = savedInstanceState.getString("DateTime");
 			int[] dateTime = parseDateTimeString(date);
 			if (dateTime != null) {
-				dp.init(dateTime[0], dateTime[1] - 1, dateTime[2], null);
+				day = dateTime[0];
+				month = dateTime[1];
+				year = dateTime[2];
+				dp.updateDate(year, month - 1, day);
 				retirementDateTime = setRetirementDateTime(dateTime);
 			}
 		} else {
@@ -133,13 +116,13 @@ public class MainActivity extends AppCompatActivity {
 			String date = sharedPref.getString(getString(R.string.savedDateTime), "");
 			int[] dateTime = parseDateTimeString(date);
 			if (dateTime != null) {
-				dp.init(dateTime[0], dateTime[1] - 1, dateTime[2], null);
+				day = dateTime[0];
+				month = dateTime[1];
+				year = dateTime[2];
+				dp.updateDate(year, month - 1, day);
 				retirementDateTime = setRetirementDateTime(dateTime);
 			}
 		}
-
-//		CustomGestureDetector customGestureDetector = new CustomGestureDetector();
-//		gestureDetector = new GestureDetector(this, customGestureDetector);
 
 	}
 
@@ -147,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
 	public void onSaveInstanceState (@NonNull Bundle savedInstanceState) {
 		super.onSaveInstanceState(savedInstanceState);
 
-		String dateTime = String.format(Locale.getDefault(), "%04d%02d%02d", dp.getYear(), dp.getMonth() + 1, dp.getDayOfMonth());
+		String dateTime = String.format(Locale.getDefault(), "%02d%02d%04d", dp.getDayOfMonth(), dp.getMonth() + 1, dp.getYear());
 		dateTime += String.format(Locale.getDefault(), "%02d%02d%02d", tp.getHour(), tp.getMinute(), second);
 		savedInstanceState.putString("DateTime", dateTime);
 	}
@@ -159,7 +142,10 @@ public class MainActivity extends AppCompatActivity {
 		String date = savedInstanceState.getString("DateTime");
 		int[] dateTime = parseDateTimeString(date);
 		if (dateTime != null) {
-			dp.init(dateTime[0], dateTime[1] - 1, dateTime[2], null);
+			day = dateTime[0];
+			month = dateTime[1];
+			year = dateTime[2];
+			dp.updateDate(year, month - 1, day);
 			tp.setHour(dateTime[3]);
 			tp.setMinute(dateTime[4]);
 			retirementDateTime = setRetirementDateTime(dateTime);
@@ -173,40 +159,47 @@ public class MainActivity extends AppCompatActivity {
 		editor.apply();
 	}
 
+	// format: dd/MM/yyy hh:mm:ss
 	private String setRetirementDateTime(int[] dateTime) {
 		return String.format(Locale.getDefault(), "%02d/%02d/%4d %02d:%02d:%02d",
-				dateTime[2], dateTime[1], dateTime[0], dateTime[3], dateTime[4], dateTime[5]);
+				dateTime[0], dateTime[1], dateTime[2], dateTime[3], dateTime[4], dateTime[5]);
 	}
 
 
-	// array = year, month, day, hour, minute, second
+	// array = day, month, year, hour, minute, second
 	private int[] parseDateTimeString(String str) {
 		if (str.length() > 0) {
-			int year = Integer.valueOf(str.substring(0, 4));
-			int month = Integer.valueOf(str.substring(4, 6));
-			int day = Integer.valueOf(str.substring(6, 8));
+			int day = Integer.valueOf(str.substring(0, 2));
+			int month = Integer.valueOf(str.substring(2, 4));
+			int year = Integer.valueOf(str.substring(4, 8));
 			int hour = Integer.valueOf(str.substring(8, 10));
 			int minute = Integer.valueOf(str.substring(10, 12));
 			int second = Integer.valueOf(str.substring(12));
-			return new int[] { year, month, day, hour, minute, second };
+			return new int[] { day, month, year, hour, minute, second };
 		}
 
 		return null;
+	}
+
+	@SuppressWarnings("deprecation")
+	private void printError() {
+		textView.setText("");
+		textView.append(Html.fromHtml("<font color=#cc0000><b>The selected date cannot be before today's date</b></font><br>"));
 	}
 
 	private void printDifference(Date startDate, Date endDate) {
 		Interval interval = new Interval(startDate.getTime(), endDate.getTime());
 		Period period = interval.toPeriod();
 
+		System.out.println("Period difference: " + period);
+
 		int years = period.getYears();
 		int months = period.getMonths();
+		int weeks = period.getWeeks();
 		int days = period.getDays();
 		int hours = period.getHours();
 		int minutes = period.getMinutes();
 		int seconds = period.getSeconds();
-
-		// set the current view
-		TextView textView = whichView == 0 ? textView1 : textView2;
 
 		textView.setText("");
 		if (years > 0) {
@@ -214,6 +207,9 @@ public class MainActivity extends AppCompatActivity {
 		}
 		if (months > 0) {
 			textView.append(String.format(Locale.getDefault(), "%-4d %s\n", months, months > 1 ? "Months" : "Month"));
+		}
+		if (weeks > 0) {
+			textView.append(String.format(Locale.getDefault(), "%-4d %s\n", weeks, weeks > 1 ? "Weeks" : "Week"));
 		}
 		if (days > 0) {
 			textView.append(String.format(Locale.getDefault(), "%-4d %s\n", days, days > 1 ? "Days" : "Day"));
@@ -226,34 +222,5 @@ public class MainActivity extends AppCompatActivity {
 		}
 		textView.append(String.format(Locale.getDefault(), "%-4d %s\n", seconds, seconds > 1 ? "Seconds" : "Second"));
 	}
-
-//	@Override
-//	public boolean onTouchEvent(MotionEvent event) {
-//		gestureDetector.onTouchEvent(event);
-//		return super.onTouchEvent(event);
-//	}
-//
-//	private class CustomGestureDetector extends GestureDetector.SimpleOnGestureListener {
-//		@Override
-//		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-//
-//			// swipe left (next)
-//			if (e1.getX() > e2.getX()) {
-//				new AnimationUtils();
-//				switcher.setAnimation(AnimationUtils.makeInAnimation(getBaseContext(), false));
-//				switcher.showNext();
-//				whichView = 1;
-//			}
-//
-//			// swipe right (previous)
-//			if (e1.getX() < e2.getX()) {
-//				new AnimationUtils();
-//				switcher.setAnimation(AnimationUtils.makeOutAnimation(getBaseContext(), true));
-//				switcher.showPrevious();
-//				whichView = 0;
-//			}
-//			return super.onFling(e1, e2, velocityX, velocityY);
-//		}
-//	}
 
 }
