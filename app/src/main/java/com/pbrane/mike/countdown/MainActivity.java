@@ -7,7 +7,6 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Html;
 import android.util.TypedValue;
 import android.widget.DatePicker;
 import android.widget.TextView;
@@ -25,7 +24,7 @@ import org.joda.time.Period;
 public class MainActivity extends AppCompatActivity {
 
 	public TextView textView;
-	private String retirementDateTime = "07/02/2023 17:00:00"; // dd/MM/yyyy HH:mm:ss
+	private String targetDateTime = "07/02/2023 17:00:00"; // dd/MM/yyyy HH:mm:ss 24-hour time format
 	private DatePicker dp;
 	private TimePicker tp;
 	// initial values for date/time
@@ -48,8 +47,7 @@ public class MainActivity extends AppCompatActivity {
 		// setup the textview
 		textView = (TextView) findViewById(R.id.textView);
 		textView.setTypeface(Typeface.MONOSPACE);
-		textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32.0f);
-		textView.setTextColor(Color.GRAY);
+		textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30.0f);
 
 		DatePicker.OnDateChangedListener dateChangedListener = new DatePicker.OnDateChangedListener() {
 			@Override
@@ -57,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
 				year = yearIn;
 				month = monthIn + 1;
 				day = dayIn;
-				retirementDateTime = String.format(Locale.getDefault(), "%02d/%02d/%4d %02d:%02d:%02d", day, month, year, hour, minute, second);
+				targetDateTime = String.format(Locale.getDefault(), "%02d/%02d/%4d %02d:%02d:%02d", day, month, year, hour, minute, second);
 				saveDateTime(String.format(Locale.getDefault(), "%02d%02d%04d%02d%02d%02d", day, month, year, hour, minute, second));
 			}
 		};
@@ -71,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 			public void onTimeChanged(TimePicker timePicker, int hourIn, int minuteIn) {
 				hour = hourIn;
 				minute = minuteIn;
-				retirementDateTime = String.format(Locale.getDefault(), "%02d/%02d/%4d %02d:%02d:%02d", day, month, year, hour, minute, second);
+				targetDateTime = String.format(Locale.getDefault(), "%02d/%02d/%4d %02d:%02d:%02d", day, month, year, hour, minute, second);
 				saveDateTime(String.format(Locale.getDefault(), "%02d%02d%04d%02d%02d%02d", day, month, year, hour, minute, second));
 			}
 		};
@@ -93,11 +91,11 @@ public class MainActivity extends AppCompatActivity {
 					if (!goalReached) {
 						String currentDateTime = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().getTime());
 						final Date start = simpleDateFormat.parse(currentDateTime);
-						final Date end = simpleDateFormat.parse(retirementDateTime);
-						if (end.compareTo(start) < 0) {
+						final Date end = simpleDateFormat.parse(targetDateTime);
+						if (end.compareTo(start) < 0) { // make sure end date/time is in the future
 							printError();
 						} else {
-							printDifference(start, end);
+							calcAndPrintInterval(start, end);
 						}
 						handler.postDelayed(this, 1000);
 					} else {
@@ -117,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
 				month = dateTime[1];
 				year = dateTime[2];
 				dp.updateDate(year, month - 1, day);
-				retirementDateTime = setRetirementDateTime(dateTime);
+				targetDateTime = setTargetDateTime(dateTime);
 			}
 		} else {
 			SharedPreferences sharedPref = this.getPreferences (MODE_PRIVATE);
@@ -128,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
 				month = dateTime[1];
 				year = dateTime[2];
 				dp.updateDate(year, month - 1, day);
-				retirementDateTime = setRetirementDateTime(dateTime);
+				targetDateTime = setTargetDateTime(dateTime);
 			}
 		}
 
@@ -153,10 +151,12 @@ public class MainActivity extends AppCompatActivity {
 			day = dateTime[0];
 			month = dateTime[1];
 			year = dateTime[2];
+			hour = dateTime[3];
+			minute = dateTime[4];
 			dp.updateDate(year, month - 1, day);
-			tp.setHour(dateTime[3]);
-			tp.setMinute(dateTime[4]);
-			retirementDateTime = setRetirementDateTime(dateTime);
+			tp.setHour(hour);
+			tp.setMinute(minute);
+			targetDateTime = setTargetDateTime(dateTime);
 		}
 	}
 
@@ -167,8 +167,8 @@ public class MainActivity extends AppCompatActivity {
 		editor.apply();
 	}
 
-	// format: dd/MM/yyy hh:mm:ss
-	private String setRetirementDateTime(int[] dateTime) {
+	// format: dd/MM/yyy HH:mm:ss
+	private String setTargetDateTime(int[] dateTime) {
 		return String.format(Locale.getDefault(), "%02d/%02d/%4d %02d:%02d:%02d",
 				dateTime[0], dateTime[1], dateTime[2], dateTime[3], dateTime[4], dateTime[5]);
 	}
@@ -189,13 +189,14 @@ public class MainActivity extends AppCompatActivity {
 		return null;
 	}
 
-	@SuppressWarnings("deprecation")
 	private void printError() {
 		textView.setText("");
-		textView.append(Html.fromHtml("<font color=#cc0000><b>The selected date cannot be before today's date</b></font><br>"));
+		textView.setTextColor(Color.RED);
+		textView.append(getText(R.string.errorString));
 	}
 
-	private void printDifference(Date startDate, Date endDate) {
+	// calculate date/time interval using joda library
+	private void calcAndPrintInterval(Date startDate, Date endDate) {
 		Interval interval = new Interval(startDate.getTime(), endDate.getTime());
 		Period period = interval.toPeriod();
 
@@ -208,34 +209,31 @@ public class MainActivity extends AppCompatActivity {
 		int seconds = period.getSeconds();
 
 		textView.setText("");
+		textView.setTextColor(Color.GRAY);
 		if (years > 0) {
-			textView.append(String.format(Locale.getDefault(), "%3d %10s\n", years, years > 1 ? "Years" : "Year"));
+			textView.append(String.format(Locale.getDefault(), "%2d %9s\n", years, years > 1 ? "Years" : "Year"));
 		}
 		if (months > 0) {
-			textView.append(String.format(Locale.getDefault(), "%3d %10s\n", months, months > 1 ? "Months" : "Month"));
+			textView.append(String.format(Locale.getDefault(), "%2d %9s\n", months, months > 1 ? "Months" : "Month"));
 		}
 		if (weeks > 0) {
-			textView.append(String.format(Locale.getDefault(), "%3d %10s\n", weeks, weeks > 1 ? "Weeks" : "Week"));
+			textView.append(String.format(Locale.getDefault(), "%2d %9s\n", weeks, weeks > 1 ? "Weeks" : "Week"));
 		}
 		if (days > 0) {
-			textView.append(String.format(Locale.getDefault(), "%3d %10s\n", days, days > 1 ? "Days" : "Day"));
+			textView.append(String.format(Locale.getDefault(), "%2d %9s\n", days, days > 1 ? "Days" : "Day"));
 		}
 		if (hours > 0) {
-			textView.append(String.format(Locale.getDefault(), "%3d %10s\n", hours, hours > 1 ? "Hours" : "Hour"));
+			textView.append(String.format(Locale.getDefault(), "%2d %9s\n", hours, hours > 1 ? "Hours" : "Hour"));
 		}
 		if (minutes > 0) {
-			textView.append(String.format(Locale.getDefault(), "%3d %10s\n", minutes, minutes > 1 ? "Minutes" : "Minute"));
+			textView.append(String.format(Locale.getDefault(), "%2d %9s\n", minutes, minutes > 1 ? "Minutes" : "Minute"));
 		}
-		textView.append(String.format(Locale.getDefault(), "%3d %10s\n", seconds, seconds > 1 ? "Seconds" : "Second"));
+		textView.append(String.format(Locale.getDefault(), "%2d %9s\n", seconds, seconds > 1 ? "Seconds" : "Second"));
 
 		if ((years + months + weeks + days + hours + minutes + seconds) <= 0) {
+			textView.setTextColor(Color.MAGENTA);
 			textView.setText(R.string.goalAttained);
 			goalReached = true;
-		}
-		if (textView.getLineCount() > 6) {
-			textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 28.0f);
-		} else {
-			textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32.0f);
 		}
 	}
 
