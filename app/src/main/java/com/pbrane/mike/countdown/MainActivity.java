@@ -25,21 +25,25 @@ import org.joda.time.Period;
 public class MainActivity extends AppCompatActivity {
 
 	public TextView textView;
-	private String retirementDateTime = "01/01/2023 17:00:00"; // dd/MM/yyyy HH:mm:ss
+	private String retirementDateTime = "07/02/2023 17:00:00"; // dd/MM/yyyy HH:mm:ss
 	private DatePicker dp;
 	private TimePicker tp;
 	// initial values for date/time
 	private int year = 2023;
-	private int month = 1;
-	private int day = 1;
+	private int month = 2;
+	private int day = 7;
 	private int hour = 17;
 	private int minute = 0;
 	private final int second = 0;
+
+	private boolean goalReached;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+
+		goalReached = false;
 
 		// setup the textview
 		textView = (TextView) findViewById(R.id.textView);
@@ -86,15 +90,19 @@ public class MainActivity extends AppCompatActivity {
 			@Override
 			public void run() {
 				try {
-					String currentDateTime = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().getTime());
-					final Date start = simpleDateFormat.parse(currentDateTime);
-					final Date end = simpleDateFormat.parse(retirementDateTime);
-					if (end.compareTo(start) < 0) {
-						printError();
+					if (!goalReached) {
+						String currentDateTime = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().getTime());
+						final Date start = simpleDateFormat.parse(currentDateTime);
+						final Date end = simpleDateFormat.parse(retirementDateTime);
+						if (end.compareTo(start) < 0) {
+							printError();
+						} else {
+							printDifference(start, end);
+						}
+						handler.postDelayed(this, 1000);
 					} else {
-						printDifference(start, end);
+						textView.setText(R.string.goalAttained);
 					}
-					handler.postDelayed(this, 1000);
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
@@ -218,11 +226,16 @@ public class MainActivity extends AppCompatActivity {
 		if (minutes > 0) {
 			textView.append(String.format(Locale.getDefault(), "%3d %10s\n", minutes, minutes > 1 ? "Minutes" : "Minute"));
 		}
-		if (seconds > 0) {
-			textView.append(String.format(Locale.getDefault(), "%3d %10s\n", seconds, seconds > 1 ? "Seconds" : "Second"));
-		}
+		textView.append(String.format(Locale.getDefault(), "%3d %10s\n", seconds, seconds > 1 ? "Seconds" : "Second"));
+
 		if ((years + months + weeks + days + hours + minutes + seconds) <= 0) {
-			textView.append("You have reached your goal!");
+			textView.setText(R.string.goalAttained);
+			goalReached = true;
+		}
+		if (textView.getLineCount() > 6) {
+			textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 28.0f);
+		} else {
+			textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32.0f);
 		}
 	}
 
