@@ -24,18 +24,12 @@ import org.joda.time.Period;
 public class MainActivity extends AppCompatActivity {
 
 	public TextView textView;
-	private String targetDateTime = "07/02/2023 17:00:00"; // dd/MM/yyyy HH:mm:ss 24-hour time format
+	private String targetDateTime;// dd/MM/yyyy HH:mm:ss 24-hour time format
 	private DatePicker dp;
 	private TimePicker tp;
 
-	// initial values for date/time
-	private int year = 2023;
-	private int month = 2;
-	private int day = 7;
-	private int hour = 17;
-	private int minute = 0;
+	// seconds aren't used - yet
 	private final int second = 0;
-
 	private boolean goalReached;
 
 	@Override
@@ -53,33 +47,26 @@ public class MainActivity extends AppCompatActivity {
 		DatePicker.OnDateChangedListener dateChangedListener = new DatePicker.OnDateChangedListener() {
 			@Override
 			public void onDateChanged(DatePicker datePicker, int yearIn, int monthIn, int dayIn) {
-				year = yearIn;
-				month = monthIn + 1;
-				day = dayIn;
-				targetDateTime = String.format(Locale.getDefault(), "%02d/%02d/%4d %02d:%02d:%02d", day, month, year, hour, minute, second);
-				saveDateTime(String.format(Locale.getDefault(), "%02d%02d%04d%02d%02d%02d", day, month, year, hour, minute, second));
+				targetDateTime = String.format(Locale.getDefault(), "%02d/%02d/%4d %02d:%02d:%02d", dayIn, monthIn + 1, yearIn, tp.getHour(), tp.getMinute(), second);
+				saveDateTime(String.format(Locale.getDefault(), "%02d%02d%04d%02d%02d%02d", dayIn, monthIn + 1, yearIn, tp.getHour(), tp.getMinute(), second));
 			}
 		};
-
 		dp = (DatePicker)findViewById(R.id.datePicker);
 		dp.setDescendantFocusability(DatePicker.FOCUS_BLOCK_DESCENDANTS); // no keyboard
-		dp.init(year, month - 1, day, dateChangedListener); // month is zero-offset
+		dp.init(2023, 1, 7, dateChangedListener); // month is zero-offset
 
 		TimePicker.OnTimeChangedListener timeChangedListener = new TimePicker.OnTimeChangedListener() {
 			@Override
 			public void onTimeChanged(TimePicker timePicker, int hourIn, int minuteIn) {
-				hour = hourIn;
-				minute = minuteIn;
-				targetDateTime = String.format(Locale.getDefault(), "%02d/%02d/%4d %02d:%02d:%02d", day, month, year, hour, minute, second);
-				saveDateTime(String.format(Locale.getDefault(), "%02d%02d%04d%02d%02d%02d", day, month, year, hour, minute, second));
+				targetDateTime = String.format(Locale.getDefault(), "%02d/%02d/%4d %02d:%02d:%02d", dp.getDayOfMonth(), dp.getMonth(), dp.getYear(), hourIn, minuteIn, second);
+				saveDateTime(String.format(Locale.getDefault(), "%02d%02d%04d%02d%02d%02d", dp.getDayOfMonth(), dp.getMonth(), dp.getYear(), hourIn, minuteIn, second));
 			}
 		};
-
 		tp = (TimePicker)findViewById(R.id.timePicker);
 		tp.setDescendantFocusability(DatePicker.FOCUS_BLOCK_DESCENDANTS); // no keyboard
 		tp.setIs24HourView(true);
-		tp.setHour(hour);
-		tp.setMinute(minute);
+		tp.setHour(17);
+		tp.setMinute(0);
 		tp.setOnTimeChangedListener(timeChangedListener);
 
 		final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
@@ -112,14 +99,9 @@ public class MainActivity extends AppCompatActivity {
 			String date = savedInstanceState.getString("DateTime");
 			int[] dateTime = parseDateTimeString(date);
 			if (dateTime != null) {
-				day = dateTime[0];
-				month = dateTime[1];
-				year = dateTime[2];
-				hour = dateTime[3];
-				minute = dateTime[4];
-				dp.updateDate(year, month - 1, day);
-				tp.setHour(hour);
-				tp.setMinute(minute);
+				dp.updateDate(dateTime[2], dateTime[1] - 1, dateTime[0]);
+				tp.setHour(dateTime[3]);
+				tp.setMinute(dateTime[4]);
 				targetDateTime = setTargetDateTime(dateTime);
 			}
 		} else {
@@ -127,14 +109,9 @@ public class MainActivity extends AppCompatActivity {
 			String date = sharedPref.getString(getString(R.string.savedDateTime), "");
 			int[] dateTime = parseDateTimeString(date);
 			if (dateTime != null) {
-				day = dateTime[0];
-				month = dateTime[1];
-				year = dateTime[2];
-				hour = dateTime[3];
-				minute = dateTime[4];
-				dp.updateDate(year, month - 1, day);
-				tp.setHour(hour);
-				tp.setMinute(minute);
+				dp.updateDate(dateTime[2], dateTime[1] - 1, dateTime[0]);
+				tp.setHour(dateTime[3]);
+				tp.setMinute(dateTime[4]);
 				targetDateTime = setTargetDateTime(dateTime);
 			}
 		}
@@ -145,8 +122,7 @@ public class MainActivity extends AppCompatActivity {
 	public void onSaveInstanceState (@NonNull Bundle savedInstanceState) {
 		super.onSaveInstanceState(savedInstanceState);
 
-		String dateTime = String.format(Locale.getDefault(), "%02d%02d%04d", dp.getDayOfMonth(), dp.getMonth() + 1, dp.getYear());
-		dateTime += String.format(Locale.getDefault(), "%02d%02d%02d", tp.getHour(), tp.getMinute(), second);
+		String dateTime = String.format(Locale.getDefault(), "%02d%02d%04d%02d%02d%02d", dp.getDayOfMonth(), dp.getMonth(), dp.getYear(), tp.getHour(), tp.getMinute(), second);
 		savedInstanceState.putString("DateTime", dateTime);
 	}
 
@@ -157,14 +133,9 @@ public class MainActivity extends AppCompatActivity {
 		String date = savedInstanceState.getString("DateTime");
 		int[] dateTime = parseDateTimeString(date);
 		if (dateTime != null) {
-			day = dateTime[0];
-			month = dateTime[1];
-			year = dateTime[2];
-			hour = dateTime[3];
-			minute = dateTime[4];
-			dp.updateDate(year, month - 1, day);
-			tp.setHour(hour);
-			tp.setMinute(minute);
+			dp.updateDate(dateTime[2], dateTime[1] - 1, dateTime[0]);
+			tp.setHour(dateTime[3]);
+			tp.setMinute(dateTime[4]);
 			targetDateTime = setTargetDateTime(dateTime);
 		}
 	}
