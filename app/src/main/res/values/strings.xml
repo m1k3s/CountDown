@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">CountDown</string>
-    <string name="savedDateTime">01012013170000</string>
+    <string name="savedDateTime">07022023170000</string>
     <string name="goalAttained">You have reached your Goal!</string>
     <string name="errorString">The selected date cannot be before today\'s date</string>
 </resources>

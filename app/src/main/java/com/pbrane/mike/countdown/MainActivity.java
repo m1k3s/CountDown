@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
 	private String targetDateTime = "07/02/2023 17:00:00"; // dd/MM/yyyy HH:mm:ss 24-hour time format
 	private DatePicker dp;
 	private TimePicker tp;
+
 	// initial values for date/time
 	private int year = 2023;
 	private int month = 2;
@@ -44,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
 		goalReached = false;
 
-		// setup the textview
+		// setup the TextView
 		textView = (TextView) findViewById(R.id.textView);
 		textView.setTypeface(Typeface.MONOSPACE);
 		textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30.0f);
@@ -114,7 +115,11 @@ public class MainActivity extends AppCompatActivity {
 				day = dateTime[0];
 				month = dateTime[1];
 				year = dateTime[2];
+				hour = dateTime[3];
+				minute = dateTime[4];
 				dp.updateDate(year, month - 1, day);
+				tp.setHour(hour);
+				tp.setMinute(minute);
 				targetDateTime = setTargetDateTime(dateTime);
 			}
 		} else {
@@ -125,7 +130,11 @@ public class MainActivity extends AppCompatActivity {
 				day = dateTime[0];
 				month = dateTime[1];
 				year = dateTime[2];
+				hour = dateTime[3];
+				minute = dateTime[4];
 				dp.updateDate(year, month - 1, day);
+				tp.setHour(hour);
+				tp.setMinute(minute);
 				targetDateTime = setTargetDateTime(dateTime);
 			}
 		}
