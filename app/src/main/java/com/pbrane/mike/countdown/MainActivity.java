@@ -44,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
 		textView.setTypeface(Typeface.MONOSPACE);
 		textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30.0f);
 
+		dp = (DatePicker)findViewById(R.id.datePicker);
+		tp = (TimePicker)findViewById(R.id.timePicker);
+
 		DatePicker.OnDateChangedListener dateChangedListener = new DatePicker.OnDateChangedListener() {
 			@Override
 			public void onDateChanged(DatePicker datePicker, int yearIn, int monthIn, int dayIn) {
@@ -51,18 +54,16 @@ public class MainActivity extends AppCompatActivity {
 				saveDateTime(String.format(Locale.getDefault(), "%02d%02d%04d%02d%02d%02d", dayIn, monthIn + 1, yearIn, tp.getHour(), tp.getMinute(), second));
 			}
 		};
-		dp = (DatePicker)findViewById(R.id.datePicker);
 		dp.setDescendantFocusability(DatePicker.FOCUS_BLOCK_DESCENDANTS); // no keyboard
 		dp.init(2023, 1, 7, dateChangedListener); // month is zero-offset
 
 		TimePicker.OnTimeChangedListener timeChangedListener = new TimePicker.OnTimeChangedListener() {
 			@Override
 			public void onTimeChanged(TimePicker timePicker, int hourIn, int minuteIn) {
-				targetDateTime = String.format(Locale.getDefault(), "%02d/%02d/%4d %02d:%02d:%02d", dp.getDayOfMonth(), dp.getMonth(), dp.getYear(), hourIn, minuteIn, second);
-				saveDateTime(String.format(Locale.getDefault(), "%02d%02d%04d%02d%02d%02d", dp.getDayOfMonth(), dp.getMonth(), dp.getYear(), hourIn, minuteIn, second));
+				targetDateTime = String.format(Locale.getDefault(), "%02d/%02d/%4d %02d:%02d:%02d", dp.getDayOfMonth(), dp.getMonth() + 1, dp.getYear(), hourIn, minuteIn, second);
+				saveDateTime(String.format(Locale.getDefault(), "%02d%02d%04d%02d%02d%02d", dp.getDayOfMonth(), dp.getMonth() + 1, dp.getYear(), hourIn, minuteIn, second));
 			}
 		};
-		tp = (TimePicker)findViewById(R.id.timePicker);
 		tp.setDescendantFocusability(DatePicker.FOCUS_BLOCK_DESCENDANTS); // no keyboard
 		tp.setIs24HourView(true);
 		tp.setHour(17);
