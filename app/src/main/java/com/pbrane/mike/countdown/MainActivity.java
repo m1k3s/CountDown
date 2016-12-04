@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 		// setup the TextView
 		textView = (TextView) findViewById(R.id.textView);
 		textView.setTypeface(Typeface.MONOSPACE);
-		textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30.0f);
+		textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24.0f);
 
 		DatePicker.OnDateChangedListener dateChangedListener = new DatePicker.OnDateChangedListener() {
 			@Override
