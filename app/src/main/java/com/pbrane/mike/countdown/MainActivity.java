@@ -1,6 +1,7 @@
 package com.pbrane.mike.countdown;
 
 import android.content.SharedPreferences;
+//import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Handler;
@@ -134,11 +135,21 @@ public class MainActivity extends AppCompatActivity {
 		String date = savedInstanceState.getString("DateTime");
 		int[] dateTime = parseDateTimeString(date);
 		if (dateTime != null) {
-			dp.updateDate(dateTime[2], dateTime[1] - 1, dateTime[0]);
+			dp.updateDate(dateTime[2], dateTime[1], dateTime[0]);
 			tp.setHour(dateTime[3]);
 			tp.setMinute(dateTime[4]);
 			targetDateTime = setTargetDateTime(dateTime);
 		}
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
 	}
 
 	private void saveDateTime(String dateTime) {

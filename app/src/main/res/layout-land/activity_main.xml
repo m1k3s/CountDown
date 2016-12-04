@@ -18,6 +18,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center_horizontal"
+        android:cursorVisible="false"
         android:background="@android:drawable/dialog_holo_light_frame"/>
 
     <LinearLayout
