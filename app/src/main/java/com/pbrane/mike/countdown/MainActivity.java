@@ -1,7 +1,6 @@
 package com.pbrane.mike.countdown;
 
 import android.content.SharedPreferences;
-//import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Handler;
@@ -25,7 +24,7 @@ import org.joda.time.Period;
 public class MainActivity extends AppCompatActivity {
 
 	public TextView textView;
-	private String targetDateTime;// dd/MM/yyyy HH:mm:ss 24-hour time format
+	private String targetDateTime; // dd/MM/yyyy HH:mm:ss 24-hour time format
 	private DatePicker dp;
 	private TimePicker tp;
 
@@ -43,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 		// setup the TextView
 		textView = (TextView) findViewById(R.id.textView);
 		textView.setTypeface(Typeface.MONOSPACE);
-		textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24.0f);
+		textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 26.0f);
 
 		dp = (DatePicker)findViewById(R.id.datePicker);
 		tp = (TimePicker)findViewById(R.id.timePicker);
@@ -55,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
 				saveDateTime(String.format(Locale.getDefault(), "%02d%02d%04d%02d%02d%02d", dayIn, monthIn + 1, yearIn, tp.getHour(), tp.getMinute(), second));
 			}
 		};
-		dp.setDescendantFocusability(DatePicker.FOCUS_BLOCK_DESCENDANTS); // no keyboard
+		dp.setDescendantFocusability(DatePicker.FOCUS_BLOCK_DESCENDANTS); // don't allow keyboard to show when long-pressed
 		dp.init(2023, 1, 7, dateChangedListener); // month is zero-offset
 
 		TimePicker.OnTimeChangedListener timeChangedListener = new TimePicker.OnTimeChangedListener() {
@@ -65,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
 				saveDateTime(String.format(Locale.getDefault(), "%02d%02d%04d%02d%02d%02d", dp.getDayOfMonth(), dp.getMonth() + 1, dp.getYear(), hourIn, minuteIn, second));
 			}
 		};
-		tp.setDescendantFocusability(DatePicker.FOCUS_BLOCK_DESCENDANTS); // no keyboard
+		tp.setDescendantFocusability(DatePicker.FOCUS_BLOCK_DESCENDANTS); // don't allow keyboard to show when long-pressed
 		tp.setIs24HourView(true);
 		tp.setHour(17);
 		tp.setMinute(0);
@@ -145,11 +144,13 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	public void onPause() {
 		super.onPause();
+		// don't need to do anything special
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
+		// don't need to do anything special
 	}
 
 	private void saveDateTime(String dateTime) {
