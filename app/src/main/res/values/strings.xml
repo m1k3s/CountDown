@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">CountDown</string>
+    <string name="app_name">Life Clock</string>
     <string name="savedDateTime">07022023170000</string>
     <string name="goalAttained">You have reached your Goal!</string>
     <string name="errorString">The selected date cannot be before today\'s date</string>

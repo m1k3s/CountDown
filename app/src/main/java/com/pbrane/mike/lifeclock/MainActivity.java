@@ -1,4 +1,4 @@
-package com.pbrane.mike.countdown;
+package com.pbrane.mike.lifeclock;
 
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -24,7 +24,7 @@ import org.joda.time.Period;
 public class MainActivity extends AppCompatActivity {
 
 	public TextView textView;
-	private String targetDateTime; // dd/MM/yyyy HH:mm:ss 24-hour time format
+	private String targetDateTime = "02/07/1956 06:56:00"; // dd/MM/yyyy HH:mm:ss 24-hour time format
 	private DatePicker dp;
 	private TimePicker tp;
 
@@ -79,13 +79,16 @@ public class MainActivity extends AppCompatActivity {
 				try {
 					if (!goalReached) {
 						String currentDateTime = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().getTime());
-						final Date start = simpleDateFormat.parse(currentDateTime);
-						final Date end = simpleDateFormat.parse(targetDateTime);
+						Date start = simpleDateFormat.parse(currentDateTime);
+						Date end = simpleDateFormat.parse(targetDateTime);
 						if (end.compareTo(start) < 0) { // make sure end date/time is in the future
-							printError();
-						} else {
+//							printError();
+							Date tmp = end;
+							end = start;
+							start = tmp;
+						} //else {
 							calcAndPrintInterval(start, end);
-						}
+						//}
 						handler.postDelayed(this, 1000);
 					} else {
 						textView.setText(R.string.goalAttained);

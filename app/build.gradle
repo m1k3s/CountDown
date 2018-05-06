@@ -19,16 +19,16 @@ android {
         release {
             keyAlias 'android'
             keyPassword System.getenv("KEYPWD")
-            storeFile file('/home/mike/.keystore-android.jks')
+            storeFile file(System.getenv("HOME") + "/.keystore-android.jks")
             storePassword System.getenv("KSTOREPWD")
         }
     }
-    compileSdkVersion 24
-    buildToolsVersion "22.0.1"
+    compileSdkVersion 23
+    buildToolsVersion '26.0.2'
     defaultConfig {
-        applicationId "com.pbrane.mike.countdown"
+        applicationId "com.pbrane.mike.lifeclock"
         minSdkVersion 23
-        targetSdkVersion 24
+        targetSdkVersion 23
         versionName getVersionName()
     }
     buildTypes {
@@ -37,11 +37,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
             applicationVariants.all { variant ->
-                variant.outputs.each { output ->
+                variant.outputs.all { output ->
                     def vstr = variant.versionName.toString().split("-")
-                    def appName = "countdown-" + vstr[0] + "-" + vstr[1]
-                    output.outputFile = new File(output.outputFile.parent,
-                            output.outputFile.name.replace("app-release", appName))
+                    def appName = "lifeclock-" + vstr[0] + "-" + vstr[1] + ".apk"
+                    outputFileName = new File(appName)
                 }
             }
         }
@@ -49,7 +48,9 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:24.2.1'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'joda-time:joda-time:2.9.6'
+    compile 'org.joda:joda-convert:1.8.1'
+    compile 'com.google.code.google-collections:google-collect:snapshot-20080530'
 }
